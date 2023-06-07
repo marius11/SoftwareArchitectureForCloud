@@ -15,7 +15,8 @@ namespace DDDCqrsEs.FunctionApp
         }
 
         [Function(nameof(DDDCqrsEsFunctionApp))]
-        public async Task Run([ServiceBusTrigger("stockevents", Connection = "ConnectionStrings:ServiceBusConnectionString")] string myQueueItem)
+		public async Task Run([ServiceBusTrigger(Common.Constants.Azure.DddCqrsEsServiceBusQueueName,
+			Connection = "ConnectionStrings:ServiceBusConnectionString")] string myQueueItem)
         {
 			var _event = JsonConvert.DeserializeObject<BaseEvent>(myQueueItem);
 

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace DDDCqrsEs.Common.Constants;
 
-namespace DDDCqrsEs.Common.Constants
+public static class StockStatusValues
 {
-    public class StockStatusValues
-    {
-        public const string AVAILABLE = "Available";
-        public const string CLOSED = "Closed";
-    }
+	public const string AVAILABLE = "Available";
+	public const string CLOSED = "Closed";
 }
