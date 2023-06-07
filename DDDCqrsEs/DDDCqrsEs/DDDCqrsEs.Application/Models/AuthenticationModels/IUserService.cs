@@ -6,11 +6,11 @@ namespace DDDCqrsEs.Application.Models.AuthenticationModels;
 
 public interface IUserService
 {
-	public Task<UserModel> SignInAsync(string email, string password);
+	public Task<UserModel> SignInAsync(string username, string password);
 
 	public Task SignOutAsync();
 
-	public Task<UserModel> RegisterAsync(RegisterUserModel user);
+	public Task<UserModel> RegisterAsync(RegisterUserModel registerUserModel);
 
 	public Task DeleteUserAsync(Guid id);
 

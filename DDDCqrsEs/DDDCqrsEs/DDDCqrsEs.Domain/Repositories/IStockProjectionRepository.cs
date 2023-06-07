@@ -2,16 +2,21 @@
 using DDDCqrsEs.Domain.Projections;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace DDDCqrsEs.Domain.Repositories
+namespace DDDCqrsEs.Domain.Repositories;
+
+public interface IStockProjectionRepository
 {
-    public interface IStockProjectionRepository
-    {
-        public IEnumerable<StockProjection> GetAllStocks();
-        public StockProjection GetStockById(Guid id);
-        public StockProjection GetStockByLicensePlate(string licensePlate);
-        public void CreateStock(StockProjection stock);
-        public void UpdateStock(Guid id, StockModel model, int version);
-        public void DeleteStock(Guid id);
-    }
+	public Task<IEnumerable<StockProjection>> GetAllStocksAsync();
+
+	public Task<StockProjection> GetStockByIdAsync(Guid id);
+
+	public Task<StockProjection> GetStockByLicensePlateAsync(string licensePlate);
+
+	public Task CreateStockAsync(StockProjection stock);
+
+	public Task UpdateStockAsync(Guid id, StockModel model, int version);
+
+	public Task DeleteStockAsync(Guid id);
 }

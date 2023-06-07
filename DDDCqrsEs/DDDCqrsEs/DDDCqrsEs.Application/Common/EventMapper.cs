@@ -1,41 +1,34 @@
-﻿using Newtonsoft.Json;
-using DDDCqrsEs.Domain.Entities;
-using DDDCqrsEs.Domain.Events;
+﻿using DDDCqrsEs.Domain.Events;
 using DDDCqrsEs.Domain.Models;
 using DDDCqrsEs.Persistance.DataModel;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace DDDCqrsEs.Application.Common
+namespace DDDCqrsEs.Application.Common;
+
+public static class EventMapper
 {
-    public class EventMapper
-    {
-        public static BaseEvent ConvertFromEntityToBase(EventEntity _event)
-        {
-            var stockData = JsonConvert.DeserializeObject<StockModel>(_event.Data);
+	public static BaseEvent ConvertFromEntityToBase(EventEntity _event)
+	{
+		var stockData = JsonConvert.DeserializeObject<StockModel>(_event.Data);
 
-            switch (_event.EventType)
-            {
-                case "StockCreated":
-                    return new StockCreated(stockData, new Guid(_event.PartitionKey));
-                case "StockUpdated":
-                    return new StockUpdated(stockData, new Guid(_event.PartitionKey));
-                case "StockDeleted":
-                    return new StockDeleted(new Guid(_event.PartitionKey));
-            }
-            return new BaseEvent();
-        }
+		return _event.EventType switch
+		{
+			"StockCreated" => new StockCreated(stockData, new Guid(_event.PartitionKey)),
+			"StockUpdated" => new StockUpdated(stockData, new Guid(_event.PartitionKey)),
+			"StockDeleted" => new StockDeleted(new Guid(_event.PartitionKey)),
+			_ => new BaseEvent(),
+		};
+	}
 
-        public static List<BaseEvent> ConvertListOfEntityEventsToBase(IEnumerable<EventEntity> _events)
-        {
-            List<BaseEvent> baseEvents = new List<BaseEvent>();
-            foreach(var _event in _events)
-            {
-                baseEvents.Add(ConvertFromEntityToBase(_event));
-            }
-            return baseEvents;
-        }
-
-    }
+	public static List<BaseEvent> ConvertListOfEntityEventsToBase(IEnumerable<EventEntity> _events)
+	{
+		List<BaseEvent> baseEvents = new List<BaseEvent>();
+		foreach (var _event in _events)
+		{
+			baseEvents.Add(ConvertFromEntityToBase(_event));
+		}
+		return baseEvents;
+	}
 }

@@ -1,73 +1,66 @@
-﻿using DDDCqrsEs.Domain.Events;
+﻿using DDDCqrsEs.Common;
+using DDDCqrsEs.Domain.Events;
+using DDDCqrsEs.Domain.Repositories;
+using DDDCqrsEs.Persistance.DataModel;
+using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using DDDCqrsEs.Domain.Repositories;
-using DDDCqrsEs.Common;
-using Newtonsoft.Json;
-using DDDCqrsEs.Persistance.DataModel;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Table;
 using System.Threading.Tasks;
 
-namespace DDDCqrsEs.Persistance.Repositories
+namespace DDDCqrsEs.Persistance.Repositories;
+
+[MapServiceDependency(Name: nameof(EventStore))]
+public class EventStore : IEventStore
 {
-    [MapServiceDependency(Name: nameof(EventStore))]
+	private readonly ITableStorageConnection _connectionCreator;
 
-    public class EventStore : IEventStore
-    {
+	public EventStore(ITableStorageConnection connection)
+	{
+		_connectionCreator = connection;
+	}
 
-        private readonly ITableStorageConnection _connectionCreator; 
+	public async Task SaveEvent(BaseEvent _event)
+	{
+		string data = JsonConvert.SerializeObject(_event.Stock);
 
-        public EventStore(ITableStorageConnection connection)
-        {
-            _connectionCreator = connection;
-        }
+		EventEntity eventEnity = new(_event.AggregateId, _event.Version)
+		{
+			EventType = _event.EventType,
+			Data = data,
+			TimeCreated = _event.TimeStamp
+		};
 
-        public async Task SaveEvent(BaseEvent _event)
-        {
-            string data = JsonConvert.SerializeObject(_event.Stock);
+		var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
+		var insertOperation = TableOperation.Insert(eventEnity);
 
-            EventEntity eventEnity = new EventEntity(_event.AggregateId, _event.Version)
-            {
-                EventType = _event.EventType,
-                Data = data,
-                TimeCreated =_event.TimeStamp
-            };
+		await cloudTable.ExecuteAsync(insertOperation);
+	}
 
-            var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
-            var insertOperation = TableOperation.Insert(eventEnity);
+	public async IAsyncEnumerable<EventEntity> GetAllEvents()
+	{
+		var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
 
-            await cloudTable.ExecuteAsync(insertOperation);
-            
-        }
+		var query = new TableQuery<EventEntity>();
 
-        public async IAsyncEnumerable<EventEntity> GetAllEvents()
-        {
-            var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
+		var result = await cloudTable.ExecuteQuerySegmentedAsync(query, null);
+		foreach (var item in result)
+		{
+			yield return item;
+		}
+	}
 
-            var query = new TableQuery<EventEntity>();
+	public async IAsyncEnumerable<EventEntity> GetEventsByAggregateId(Guid id)
+	{
+		var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
 
-            var result = cloudTable.ExecuteQuerySegmentedAsync(query, null);
-            foreach (var item in result.Result)
-            {
-                yield return item;
-            }
-        }
+		var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, id.ToString());
+		var query = new TableQuery<EventEntity>().Where(filter);
 
-        public async IAsyncEnumerable<EventEntity> GetEventsByAggregateId(Guid id)
-        {
-            var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
-
-            var filter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, id.ToString());
-            var query = new TableQuery<EventEntity>().Where(filter);
-
-            var result = cloudTable.ExecuteQuerySegmentedAsync(query, null);
-            foreach (var item in result.Result)
-            {
-                yield return item;
-            }
-        }
-
-    }
+		var result = await cloudTable.ExecuteQuerySegmentedAsync(query, null);
+		foreach (var item in result)
+		{
+			yield return item;
+		}
+	}
 }

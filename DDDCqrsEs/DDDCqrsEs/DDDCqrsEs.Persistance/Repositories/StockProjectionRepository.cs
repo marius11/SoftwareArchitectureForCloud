@@ -1,75 +1,69 @@
 ﻿using DDDCqrsEs.Application.Common;
 using DDDCqrsEs.Common;
 using DDDCqrsEs.Common.Constants;
-using DDDCqrsEs.Domain.Entities;
 using DDDCqrsEs.Domain.Models;
 using DDDCqrsEs.Domain.Projections;
 using DDDCqrsEs.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace DDDCqrsEs.Persistance.Repositories
+namespace DDDCqrsEs.Persistance.Repositories;
+
+[MapServiceDependency(Name: nameof(StockProjectionRepository))]
+public class StockProjectionRepository : IStockProjectionRepository
 {
-    [MapServiceDependency(Name: nameof(StockProjectionRepository))]
-    public class StockProjectionRepository : IStockProjectionRepository
-    {
-        private ToDoDbContext dbContext;
-        public StockProjectionRepository(ToDoDbContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
+	private readonly ToDoDbContext dbContext;
 
-        public IEnumerable<StockProjection> GetAllStocks()
-        {
+	public StockProjectionRepository(ToDoDbContext dbContext)
+	{
+		this.dbContext = dbContext;
+	}
 
-            return dbContext.Stocks.ToList();
-        }
+	public async Task<IEnumerable<StockProjection>> GetAllStocksAsync()
+	{
+		return await dbContext.Stocks.ToListAsync();
+	}
 
-        public StockProjection GetStockById(Guid id)
-        {
-            var stock = dbContext.Stocks.FirstOrDefault(s => s.Id == id);
-            stock.BestBeforeDate = stock.BestBeforeDate.ToLocalTime();
-            return stock;
-        }
+	public async Task<StockProjection> GetStockByIdAsync(Guid id)
+	{
+		var stock = await dbContext.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+		stock.BestBeforeDate = stock.BestBeforeDate.ToLocalTime();
+		return stock;
+	}
 
-        public void CreateStock(StockProjection stock)
-        {
-            dbContext.Add(stock);
-            dbContext.SaveChanges();
-        }
+	public async Task CreateStockAsync(StockProjection stock)
+	{
+		await dbContext.AddAsync(stock);
+		await dbContext.SaveChangesAsync();
+	}
 
-        public void DeleteStock(Guid stockId)
-        {
+	public async Task DeleteStockAsync(Guid id)
+	{
+		var stockToBeDeleted = await dbContext.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+		if (stockToBeDeleted != null)
+		{
+			stockToBeDeleted.Status = StockStatusValues.CLOSED;
+			await dbContext.SaveChangesAsync();
+		}
+	}
 
-            var stockToBeDeleted = dbContext.Stocks.FirstOrDefault(s => s.Id == stockId);
-            if (stockToBeDeleted != null)
-            {
-                stockToBeDeleted.Status = StockStatusValues.CLOSED;
-                dbContext.SaveChanges();
-            }
+	public async Task UpdateStockAsync(Guid id, StockModel model, int version)
+	{
+		var stockToBeUpdated = await dbContext.Stocks.FirstOrDefaultAsync(s => s.Id == id);
+		if (stockToBeUpdated != null)
+		{
+			ModelMapper.MapModelIntoProjection(stockToBeUpdated, model);
+			stockToBeUpdated.Version = version;
+			await dbContext.SaveChangesAsync();
+		}
+	}
 
-        }
-
-        public void UpdateStock(Guid stockId, StockModel stock, int version)
-        {
-
-            var stockToBeUpdated = dbContext.Stocks.FirstOrDefault(s => s.Id == stockId);
-            if (stockToBeUpdated != null)
-            {
-                ModelMapper.MapModelIntoProjection(stockToBeUpdated, stock);
-                stockToBeUpdated.Version = version;
-                dbContext.SaveChanges();
-            }
-
-        }
-
-        public StockProjection GetStockByLicensePlate(string licensePlate)
-        {
-
-            var stock = dbContext.Stocks.FirstOrDefault(s => s.LicensePlate == licensePlate);
-            return stock;
-
-        }
-    }
+	public async Task<StockProjection> GetStockByLicensePlateAsync(string licensePlate)
+	{
+		var stock = await dbContext.Stocks.FirstOrDefaultAsync(s => s.LicensePlate == licensePlate);
+		return stock;
+	}
 }

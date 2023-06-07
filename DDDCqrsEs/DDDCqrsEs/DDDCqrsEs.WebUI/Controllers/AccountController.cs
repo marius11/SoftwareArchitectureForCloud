@@ -1,17 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using DDDCqrsEs.Application.Commands.UserCommands;
+using DDDCqrsEs.Application.Queries.UserQueries;
 using DDDCqrsEs.Domain.Entities;
+using DDDCqrsEs.WebUI.Controllers.Base;
 using DDDCqrsEs.WebUI.Utils;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using DDDCqrsEs.WebUI.Controllers.Base;
-using DDDCqrsEs.Application.Commands.UserCommands;
-using DDDCqrsEs.Application.Queries.UserQueries;
-using DDDCqrsEs.Application.Queries.UserQueries;
 
 namespace DDDCqrsEs.WebUI.Controllers
 {
-    [Route("api/[controller]")]
+	[Route("api/[controller]")]
     [ApiController]
     public class AccountController : BaseController
     {
