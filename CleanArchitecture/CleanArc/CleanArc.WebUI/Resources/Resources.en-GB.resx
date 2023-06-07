@@ -137,6 +137,9 @@
     <value>The value of the {0} shoud be greater or equal to {1}</value>
     <comment>{0} - Property name; {1} - Min value</comment>
   </data>
+  <data name="ImportantTodoAlreadyExists" xml:space="preserve">
+    <value>There is already an IMPORTANT note to be resolved, please resolve that one before adding a new one.</value>
+  </data>
   <data name="LowerErrorMessage" xml:space="preserve">
     <value>The value of the {0} shoud be lower than {1}</value>
     <comment>{0} - Property name; {1} - Max value</comment>
