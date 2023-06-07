@@ -1,0 +1,11 @@
+{
+	"IsEncrypted": false,
+	"Values": {
+		"AzureWebJobsStorage": "UseDevelopmentStorage=true",
+		"FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+	},
+	"ConnectionStrings": {
+		"SqlDbConnectionString": "Server=tcp:arch-mm-sql-server.database.windows.net,1433;Initial Catalog=arch-mm-sql-db-ddd-cqrs-es;Persist Security Info=False;User ID=marius;Password=P@ssword123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+		"ServiceBusConnectionString": "Endpoint=sb://arch-mm.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=WW6LtisNZrvE41OhHtsF9DRMAZK/ziWu/+ASbGvd8sg="
+	}
+}

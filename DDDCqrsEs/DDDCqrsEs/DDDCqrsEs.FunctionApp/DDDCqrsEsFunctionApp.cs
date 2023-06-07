@@ -1,7 +1,6 @@
 using DDDCqrsEs.Domain.Events;
 using MediatR;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace DDDCqrsEs.FunctionApp
@@ -16,10 +15,8 @@ namespace DDDCqrsEs.FunctionApp
         }
 
         [Function(nameof(DDDCqrsEsFunctionApp))]
-        public async Task Run([ServiceBusTrigger("stockevents", Connection = "ServiceBusConnectionString")] string myQueueItem)
+        public async Task Run([ServiceBusTrigger("stockevents", Connection = "ConnectionStrings:ServiceBusConnectionString")] string myQueueItem)
         {
-            //_logger.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
-
 			var _event = JsonConvert.DeserializeObject<BaseEvent>(myQueueItem);
 
 			var assembly = typeof(BaseEvent).Assembly;
