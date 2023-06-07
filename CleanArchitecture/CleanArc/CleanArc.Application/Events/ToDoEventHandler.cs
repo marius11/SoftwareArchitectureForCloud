@@ -9,6 +9,7 @@ namespace CleanArc.Application.Events
     public class ToDoEventHandler : INotificationHandler<ToDoAdded>
     {
         private readonly INotificationService _notificationService;
+
         public ToDoEventHandler(INotificationService notificationService)
         {
             _notificationService = notificationService;
@@ -21,7 +22,7 @@ namespace CleanArc.Application.Events
 
         public async Task Handle(ToDoAdded todoAdded, CancellationToken cancellationToken)
         {
-            // handle the event here
+            await _notificationService.NotifyAsync("Your todo has been added");
         }
     }
 }

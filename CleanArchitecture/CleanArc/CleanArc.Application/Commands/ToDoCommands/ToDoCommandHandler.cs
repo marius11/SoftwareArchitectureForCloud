@@ -44,7 +44,11 @@ namespace CleanArc.Application.Commands.ToDoCommands
                 uow.Add(toDo);
                 await uow.SaveChangesAsync(cancellationToken);
             }
-            _eventDispatcher.Publish(new ToDoAdded(newId));
+
+            if (request.ToDo.Notify)
+            {
+                _eventDispatcher.Publish(new ToDoAdded(newId));
+            }
 
             _logger.LogInformation("Finished Add task {0}", request.ToDo.Name);
             return new AddToDoCommandResponse
