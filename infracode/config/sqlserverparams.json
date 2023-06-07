@@ -6,10 +6,10 @@
     "sqlServers": {
       "value": [          
           {
-          "name": "arcacsqlserver",
-          "database": "arcacsqldb",
-          "username": "andrei",
-          "password": "P@ssw0rd98763123",
+          "name": "arch-mm-sql-server",
+          "database": "arch-mm-sql-db",
+          "username": "marius",
+          "password": "P@ssword123",
           "publicNetworkAccess": "Enabled"
           }
           ]
