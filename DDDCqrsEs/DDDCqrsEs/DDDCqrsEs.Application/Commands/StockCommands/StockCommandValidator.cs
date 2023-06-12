@@ -47,6 +47,7 @@ public class UpdateStockCommandValidator : AbstractValidator<UpdateStockCommand>
 		_stockProjectionRepository = stockProjectionRepository;
 		RuleFor(x => x.BestBeforeDate).Must(IsNotInPast).WithMessage("You cannot enter a date from the past.");
 		RuleFor(x => x).MustAsync(BeUniqueAsync).WithMessage("License plate already exists in database.");
+		RuleFor(x => x).MustAsync(HasNotChangedSinceAsync).WithMessage("Data was changed by another user.");
 	}
 
 	private async Task<bool> BeUniqueAsync(UpdateStockCommand command, CancellationToken cancellationToken)
@@ -69,7 +70,7 @@ public class UpdateStockCommandValidator : AbstractValidator<UpdateStockCommand>
 		return true;
 	}
 
-	public async Task<bool> HasNotChangedSinceAsync(UpdateStockCommand command)
+	public async Task<bool> HasNotChangedSinceAsync(UpdateStockCommand command, CancellationToken cancellationToken)
 	{
 		var stockFromDb = await _stockProjectionRepository.GetStockByIdAsync(command.Id);
 		if (stockFromDb.Version == command.Version)
