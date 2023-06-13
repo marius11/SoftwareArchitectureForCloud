@@ -2,10 +2,12 @@
 using DDDCqrsEs.Domain.Events;
 using DDDCqrsEs.Domain.Repositories;
 using DDDCqrsEs.Persistance.DataModel;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace DDDCqrsEs.Persistance.Repositories;
@@ -34,7 +36,14 @@ public class EventStore : IEventStore
 		var cloudTable = await _connectionCreator.CreateConnection(nameof(EventStore));
 		var insertOperation = TableOperation.Insert(eventEnity);
 
-		await cloudTable.ExecuteAsync(insertOperation);
+		try
+		{
+			await cloudTable.ExecuteAsync(insertOperation);
+		}
+		catch (StorageException ex) when (ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.Conflict)
+		{
+			throw new InvalidOperationException("Data was changed by another user.", ex);
+		}
 	}
 
 	public async IAsyncEnumerable<EventEntity> GetAllEvents()
